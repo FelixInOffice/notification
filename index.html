@@ -4,15 +4,70 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="./scripts/moment-with-locales.min.js"></script>
+
     <title>Notification test</title>
 </head>
 <body>
+    <input type="text" id="notesTitle0"><br>
+    <textarea id="notesBody0"></textarea><br>
+    <input type="datetime-local" id="timePicker0">
+    <button id="saveBtn0" onclick="getID(this.id)">Save</button>
+    <button id="editBtn0" onclick="edit(this.id)">Edit</button>
     <script>
-        console.log(Notification.permission);
+        moment.locale('zh-hk');
 
-        function showNotification() {
-            const notification = new Notification("New message!" , {
-                body: "test",
+        let setTime;
+        let notesTitle;
+        let notesBody;
+        let saveButton;
+        let editButton;
+
+        function getID(i) {
+            var indexID = i.replace(/[^0-9]/g, '');
+            setTime = document.getElementById(`timePicker${indexID}`);
+            notesTitle = document.getElementById(`notesTitle${indexID}`);
+            notesBody = document.getElementById(`notesBody${indexID}`);
+            saveButton = document.getElementById(`saveBtn${indexID}`);
+            editButton = document.getElementById(`editBtn${indexID}`);
+            console.log(indexID);
+            save();
+        }
+
+        editButton.disabled = true;
+
+        function pushNotification(){
+            while (moment().format("YYYY年MM月DD日 HH:mm") == moment(moment(setTime.value).clone()).format("YYYY年MM月DD日 HH:mm")) {
+                showNotification(notesTitle.value,notesBody.value);
+                clearInterval(countTime);
+                break;
+            }
+        }
+
+        function save() {
+            if (notesBody.value !== "" && notesTitle.value !== "" && setTime.value !== "") {
+                notesTitle.disabled = true;
+                notesBody.disabled = true;
+                setTime.disabled = true;
+                saveButton.disabled = true;
+                editButton.disabled = false;
+                countTime = setInterval(pushNotification, 1000);
+            }
+        }
+
+        function edit() {
+            clearInterval(countTime);
+            notesTitle.disabled = false;
+            notesBody.disabled = false;
+            setTime.disabled = false;
+            editButton.disabled = true;
+            saveButton.disabled = false;
+        }
+
+        function showNotification(title,messages) {
+            const notification = new Notification(title , {
+                body: messages,
                 icon: "./test.png"
             });
 
@@ -22,11 +77,11 @@
         }
 
         if (Notification.permission === "granted") {
-            showNotification();
+            //showNotification();
         } else if (Notification.permission !== "denied") {
             Notification.requestPermission().then(permission => {
                 if (permission === "granted") {
-                    showNotification();
+                    //showNotification();
                 }
             });
         }
