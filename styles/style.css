@@ -1,0 +1,205 @@
+.input-name{
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+}
+.input-name > input[type=text]{
+    border: none;
+    border-bottom: 2px solid #a1a1a1e1;
+    outline: none;
+    background-color: #eee;
+    transition: all 0.3s;
+}
+
+input:disabled{
+    background-color: #eee;
+    color: rgb(201, 201, 201)!important;
+}
+
+textarea:disabled {
+    background-color: #eee;
+    color: rgb(201, 201, 201)!important;
+}
+
+.day input:disabled{
+    background-color: #eee;
+    color: rgb(131, 131, 131)!important;
+}
+
+.day textarea:disabled {
+    background-color: #eee;
+    color: rgb(131, 131, 131)!important;
+}
+
+.night .input-name > input[type=text]{
+    border: none;
+    border-bottom: 2px solid #838383;
+    outline: none;
+    background-color: #333;
+    color: white;
+}
+  
+.underline-animation{
+    transition: all 0.5s;
+    display: inline-block;
+    bottom: 0;
+    left: -100%;
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background-color: #000000;
+}
+
+.night .underline-animation{
+    transition: all 0.5s;
+    display: inline-block;
+    bottom: 0;
+    left: -100%;
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background-color: white;
+}
+
+.input-name > input[type=text]:focus + .underline-animation{
+    left: 0;
+}
+
+textarea {
+    resize: none;
+    height: 30vh;
+    border: #a1a1a1e1 2px solid;
+    transition: all 0.3s ease-out;
+    background-color: #eee;
+ }
+
+ .night textarea {
+    resize: none;
+    height: 30vh;
+    border: #a1a1a1e1 2px solid;
+    transition: all 0.3s ease-out;
+    background-color: #333;
+    color: white;
+ }
+
+ textarea:focus {
+     outline: none;
+     border: #000000 2px solid;
+     transition: all 0.6s;
+ }
+
+ .night textarea:focus {
+    outline: none;
+    border: white 2px solid;
+    transition: all 0.6s;
+ }
+
+ input[type=datetime-local] {
+    border: #a1a1a1e1 2px solid;
+    transition: all 0.3s ease-out;
+    background-color: #eee;
+ }
+
+ .night input[type=datetime-local] {
+    border: #a1a1a1e1 2px solid;
+    transition: all 0.3s ease-out;
+    background-color: #333;
+    color: white;
+ }
+
+ input[type=datetime-local]:focus {
+    outline: none;
+    border: #000000 2px solid;
+    transition: all 0.6s;
+ }
+
+ .night input[type=datetime-local]:focus {
+    outline: none;
+    border: white 2px solid;
+    transition: all 0.6s;
+ }
+
+ button {
+    background:none;
+    border:none;
+    margin:0;
+    padding:0;
+    cursor: pointer;
+    width:50px;
+    height:20px;
+    transition: all 0.3s ease-out;
+ }
+
+ button:focus {
+    background-color: #a7a7a742;
+    border:none;
+    margin:0;
+    padding:0;
+    cursor: pointer;
+    transition: all 0.6s;
+ }
+
+.day { background: #eee; color: black;}
+.day button {color:black;}
+.night { background: #333; color: white;}
+.night button {color:white;}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+  
+.switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}

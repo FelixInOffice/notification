@@ -5,66 +5,276 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="./styles/style.css">
     <script src="./scripts/moment-with-locales.min.js"></script>
 
     <title>Notification test</title>
 </head>
-<body>
-    <input type="text" id="notesTitle0"><br>
-    <textarea id="notesBody0"></textarea><br>
-    <input type="datetime-local" id="timePicker0">
-    <button id="saveBtn0" onclick="getID(this.id)">Save</button>
-    <button id="editBtn0" onclick="edit(this.id)">Edit</button>
+<body class="day">
+    <table style="position: absolute;right: 20px; top: 20px">
+        <tr>
+            <td>深色主題切換：</td>
+            <td>
+                <label class="switch">
+                    <input type="checkbox" id="dayNightSwitcher" onchange="darkModeSwitcher()">
+                    <span class="slider round"></span>
+                </label>
+            </td>
+        </tr>
+    </table>
+    <button id="addRecords" onclick="addRecords()">Add</button><br>
+
+    <div id="outputDiv"></div> <!-- Need to delete -->
+
+    <table class="table" id="notesTable" style="width: 92%; margin: auto; margin-top: 50px; text-align: center;">
+        <!-- 下面 Script 會入 -->
+    </table>
+    
     <script>
         moment.locale('zh-hk');
+
+        var switcher = document.getElementById("dayNightSwitcher");
+
+        if (localStorage.getItem("theme") !== null) {
+            document.body.setAttribute("class",localStorage.getItem("theme"));
+        }
+
+        if (localStorage.getItem("theme") == "night") {
+            $("#dayNightSwitcher").prop("checked", true);
+        } else if (localStorage.getItem("theme") == "day") {
+            $("#dayNightSwitcher").prop("checked", false);
+        }
+
+        function darkModeSwitcher() {
+            if (switcher.checked) {
+                document.body.setAttribute("class","night");
+                localStorage.setItem("theme", "night");
+            } else {
+                document.body.setAttribute("class","day");
+                localStorage.setItem("theme", "day");
+            }
+        }
 
         let setTime;
         let notesTitle;
         let notesBody;
         let saveButton;
         let editButton;
+        let myIntervals = {};
+        //var notificationPush;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class fooTimer{
+    constructor(intervalFunction,intervalValue) {
+        if(!arguments){throw Exception;}
+        this.intervalFunction = intervalFunction; // ()=>{}
+        this.intervalValue = intervalValue || 1000;
+        this.interval = setInterval(this.intervalFunction,this.intervalValue);
+    }
+    stopInterval(){
+        clearInterval(this.interval);
+        this.interval = null;
+    }
+    startInterval() {
+        if (this.interval) {
+            this.stopInterval()
+        }
+        this.interval = setInterval(this.intervalFunction, this.intervalValue);
+    }
+}
 
+
+var timeGroup = [];
+
+function generateTimer(n) {
+    if(n ===1 ) return timeGroup.push(new fooTimer(timeGroup.length));
+    for (var i=0;i<n;i++){
+        timeGroup.push(new fooTimer(i));
+    }
+}
+function clearTimer(i) {
+    if(timeGroup[i] instanceof fooTimer){
+        timeGroup[i].stopInterval();
+    }
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         function getID(i) {
             var indexID = i.replace(/[^0-9]/g, '');
-            setTime = document.getElementById(`timePicker${indexID}`);
-            notesTitle = document.getElementById(`notesTitle${indexID}`);
-            notesBody = document.getElementById(`notesBody${indexID}`);
-            saveButton = document.getElementById(`saveBtn${indexID}`);
-            editButton = document.getElementById(`editBtn${indexID}`);
-            console.log(indexID);
-            save();
-        }
+            
 
-        editButton.disabled = true;
+            //save(indexID);
 
-        function pushNotification(){
-            while (moment().format("YYYY年MM月DD日 HH:mm") == moment(moment(setTime.value).clone()).format("YYYY年MM月DD日 HH:mm")) {
-                showNotification(notesTitle.value,notesBody.value);
-                clearInterval(countTime);
-                break;
-            }
-        }
-
-        function save() {
+            // Save Notes
             if (notesBody.value !== "" && notesTitle.value !== "" && setTime.value !== "") {
                 notesTitle.disabled = true;
                 notesBody.disabled = true;
                 setTime.disabled = true;
                 saveButton.disabled = true;
                 editButton.disabled = false;
-                countTime = setInterval(pushNotification, 1000);
+                editButton.style.display = "";
+                saveButton.style.display = "none";
+                //this.indexID = setInterval(pushNotification, 1000);
+
+                //setTimer(indexID);
+
+                //eval('var ' + notificationPush + indexID + ' = ' + setInterval(pushNotification, 1000) + ';');
+
+                //console.log(countTime);
+                localStorage.setItem(`savedTitle${indexID}`,notesTitle.value);
+                localStorage.setItem(`savedBody${indexID}`,notesBody.value);
+                localStorage.setItem(`savedTime${indexID}`,setTime.value);
+
+                //myIntervals[indexID] = setInterval(pushNotification.bind(null,indexID), 1000);
+                console.log(indexID);
+                //console.log(myIntervals[indexID]);
             }
         }
 
-        function edit() {
-            clearInterval(countTime);
-            notesTitle.disabled = false;
-            notesBody.disabled = false;
-            setTime.disabled = false;
-            editButton.disabled = true;
-            saveButton.disabled = false;
+        function setTimer(i) {
+            
+            var indexID = i.replace(/[^0-9]/g, '');
+
+            setTime = document.getElementById(`timePicker${indexID}`);
+            notesTitle = document.getElementById(`notesTitle${indexID}`);
+            notesBody = document.getElementById(`notesBody${indexID}`);
+            saveButton = document.getElementById(`saveBtn${indexID}`);
+            editButton = document.getElementById(`editBtn${indexID}`);
+
+            var countSave = Number(localStorage.getItem(`countSave${indexID}`));
+            var countEdit = Number(localStorage.getItem(`countEdit${indexID}`));
+
+            if (i == `saveBtn${indexID}` && countSave < 1 && (notesBody.value !== "" && notesTitle.value !== "" && setTime.value !== "")) {
+                console.log("You clicked save");
+                if (countEdit > 0) {
+                    localStorage.setItem(`countEdit${indexID}`,'0');
+                }
+                localStorage.setItem(`countSave${indexID}`,'1');
+
+                getID(i);
+
+                new fooTimer(indexID,pushNotification.bind(null,indexID),1000); ///////////////////////////////////// here - 16 July 2020
+
+            } else if (i == `editBtn${indexID}` && countEdit < 1) {
+                console.log("You clicked edit");
+                localStorage.setItem(`countEdit${indexID}`,'1');;
+                localStorage.setItem(`countSave${indexID}`,'0');
+
+                //clearInterval(myIntervals[indexID]);
+                new fooTimer(clear(indexID)).stopInterval;
+
+
+                edit(i);
+            } else if (i !== `editBtn${indexID}` && countEdit > 0) { // Need to delete
+                console.log("Error Edit");
+            } else if (i !== `saveBtn${indexID}` && countSave > 0) { // Need to delete
+                console.log("Error Save");
+            }
+
+            //document.getElementById(`saveBtn${indexID}`).onclick = function () {
+                //console.log("You clicked save");
+                //getID(this.id);
+            //}
         }
 
+        function pushNotification(i){
+            //console.log(typeof(moment().format("YYYY-MM-DD-HH:mm")) + " and " + typeof(moment(moment(setTime.value).clone()).format("YYYY-MM-DD-HH:mm")));
+            while (moment().format("YYYY-MM-DD-HH:mm") == moment(moment(setTime.value).clone()).format("YYYY-MM-DD-HH:mm")) {
+                showNotification(notesTitle.value,notesBody.value);
+                clearInterval(myIntervals[i]);
+                break;
+            }
+        }
+
+        //function save(indexID) {
+            //if (notesBody.value !== "" && notesTitle.value !== "" && setTime.value !== "") {
+                //notesTitle.disabled = true;
+                //notesBody.disabled = true;
+                //setTime.disabled = true;
+                //saveButton.disabled = true;
+                //editButton.disabled = false;
+                //editButton.style.display = "";
+                //saveButton.style.display = "none";
+                ////this.indexID = setInterval(pushNotification, 1000);
+//
+//
+                ////eval('var ' + notificationPush + indexID + ' = ' + setInterval(pushNotification, 1000) + ';');
+//
+                ////console.log(countTime);
+                //localStorage.setItem(`savedTitle${indexID}`,notesTitle.value);
+                //localStorage.setItem(`savedBody${indexID}`,notesBody.value);
+                //localStorage.setItem(`savedTime${indexID}`,setTime.value);
+            //}
+        //}
+
+        function edit(i) {
+            var indexID = i.replace(/[^0-9]/g, '');
+            document.getElementById(`notesTitle${indexID}`).disabled = false;
+            document.getElementById(`notesBody${indexID}`).disabled = false;
+            document.getElementById(`timePicker${indexID}`).disabled = false;
+            document.getElementById(`editBtn${indexID}`).disabled = true;
+            document.getElementById(`saveBtn${indexID}`).disabled = false;
+            document.getElementById(`editBtn${indexID}`).style.display = "none";
+            document.getElementById(`saveBtn${indexID}`).style.display = "";
+        }
+
+        // Add new notes
+        function addRecords() {
+            if (localStorage.getItem("numOfNotes") == null) {
+                localStorage.setItem("numOfNotes","1");
+                let numOfNotesFirst = Number(localStorage.getItem("numOfNotes"));
+                localStorage.setItem("numOfNotes",numOfNotesFirst);
+                for (let i = 0; i < numOfNotesFirst; i++) {
+                    document.getElementById("notesTable").insertRow(-1).insertCell(0).innerHTML = `<div class="input-name"><input type="text" id="notesTitle${i}" style="width:70vw;" placeholder="Title"><span class="underline-animation"></span></div>`;
+                    document.getElementById("notesTable").insertRow(-1).insertCell(0).innerHTML = `<textarea id="notesBody${i}" style="width:70vw;" placeholder="Content"></textarea>`;
+                    document.getElementById("notesTable").insertRow(-1).insertCell(0).innerHTML = `<input type="datetime-local" id="timePicker${i}" style="width: 70vw;">`;
+                    document.getElementById("notesTable").insertRow(-1).insertCell(0).innerHTML = `<button id="saveBtn${i}" onclick="setTimer(this.id)">Save</button><button id="editBtn${i}" onclick="setTimer(this.id)" disabled style="display: none;">Edit</button>`;
+
+                    localStorage.setItem(`countSave${i}`,0);
+                    localStorage.setItem(`countEdit${i}`,0);
+                }
+            } else {
+                let numOfNotes = Number(localStorage.getItem("numOfNotes")) + 1;
+                let countNotes = Number(localStorage.getItem("numOfNotes"));
+                localStorage.setItem("numOfNotes",numOfNotes);
+                for (let i = countNotes; i < numOfNotes; i++) {
+                    document.getElementById("notesTable").insertRow(-1).insertCell(0).innerHTML = `<div class="input-name"><input type="text" id="notesTitle${i}" style="width:70vw;" placeholder="Title"><span class="underline-animation"></span></div>`;
+                    document.getElementById("notesTable").insertRow(-1).insertCell(0).innerHTML = `<textarea id="notesBody${i}" style="width:70vw;" placeholder="Content"></textarea>`;
+                    document.getElementById("notesTable").insertRow(-1).insertCell(0).innerHTML = `<input type="datetime-local" id="timePicker${i}" style="width: 70vw;">`;
+                    document.getElementById("notesTable").insertRow(-1).insertCell(0).innerHTML = `<button id="saveBtn${i}" onclick="setTimer(this.id)">Save</button><button id="editBtn${i}" onclick="setTimer(this.id)" disabled style="display: none;">Edit</button>`;
+
+                    localStorage.setItem(`countSave${i}`,0);
+                    localStorage.setItem(`countEdit${i}`,0);
+                }
+            }
+        }
+
+        // The saved records
+        for (let i = 0; i < Number(localStorage.getItem("numOfNotes")); i++) {
+            if (localStorage.getItem(`savedTitle${i}`) !== null && localStorage.getItem(`savedBody${i}`) !== null && localStorage.getItem(`savedTime${i}`) !== null) {
+
+                document.getElementById("notesTable").insertRow(-1).insertCell(0).innerHTML = `<div class="input-name"><input type="text" id="notesTitle${i}" style="width:70vw;" placeholder="Title"><span class="underline-animation"></span></div>`;
+                document.getElementById("notesTable").insertRow(-1).insertCell(0).innerHTML = `<textarea id="notesBody${i}" style="width:70vw;" placeholder="Content"></textarea>`;
+                document.getElementById("notesTable").insertRow(-1).insertCell(0).innerHTML = `<input type="datetime-local" id="timePicker${i}" style="width: 70vw;">`;
+                document.getElementById("notesTable").insertRow(-1).insertCell(0).innerHTML = `<button id="saveBtn${i}" onclick="getID(this.id)" disabled style="display: none;">Save</button><button id="editBtn${i}" onclick="edit(this.id)">Edit</button>`;
+
+                document.getElementById(`notesTitle${i}`).value = localStorage.getItem(`savedTitle${i}`);
+                document.getElementById(`notesBody${i}`).value = localStorage.getItem(`savedBody${i}`);
+                document.getElementById(`timePicker${i}`).value = localStorage.getItem(`savedTime${i}`);
+
+                document.getElementById(`notesTitle${i}`).disabled = true;
+                document.getElementById(`notesBody${i}`).disabled = true;
+                document.getElementById(`timePicker${i}`).disabled = true;
+
+                //document.getElementById(`saveBtn${i}`).style.display = 'none';
+                //document.getElementById(`editBtn${i}`).style.display = "";
+
+            } else {
+                continue;
+            }
+        }
+
+        // Show Notification
         function showNotification(title,messages) {
             const notification = new Notification(title , {
                 body: messages,
